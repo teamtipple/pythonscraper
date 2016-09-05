@@ -6,7 +6,7 @@ from bs4 import BeautifulSoup
 
 def parse_page(name):
 
-    webpage = open('data/{}.html'.format(name))
+    webpage = open('input/{}.html'.format(name))
 
     soup = BeautifulSoup(webpage, 'html.parser')
 
@@ -39,7 +39,7 @@ def parse_page(name):
 
         waypoints.append(waypoint)
 
-    json.dump(waypoints,open('data/{}.json'.format(name),'w'),indent=4)
+    json.dump(waypoints,open('output/{}.json'.format(name),'w'),indent=4)
 
     return waypoints
 
@@ -47,16 +47,24 @@ def find_pages():
 
     waypoints = []
 
-    filepaths = glob.glob('data/*.html')
+    filepaths = glob.glob('input/*.html')
 
     for filepath in filepaths:
 
-        match = re.match(r'data/([^.]*)\.html',filepath)
+        match = re.match(r'input/([^.]*)\.html',filepath)
         name = match.group(1)
 
         waypoints.extend(parse_page(name))
 
-    json.dump(waypoints,open('data/waypoints.json','w'),indent=4)
+    categories = json.load(open('input/categories.json'))
+
+    for waypoint in waypoints:
+        waypoint['icon'] = 'client/assets/images/{}'.format(
+            categories[waypoint['category']]
+        )
+
+    json.dump(waypoints,open('output/waypoints.json','w'),indent=4)
+
 
 if (__name__ == "__main__"):
     find_pages()
